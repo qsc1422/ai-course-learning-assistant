@@ -522,3 +522,54 @@ body{
 .notice{border-left:3px solid #dfe6f2}
 .notice.ai{border-left-color:#9dbcf7}
 
+/* ---------- 主内容区加色块：让版面有承托，仍然低饱和 ---------- */
+.topbar{background:linear-gradient(180deg,#ffffff,#fbfcff)}
+.rail{background:linear-gradient(180deg,#ffffff,#f8fafd)}
+.hero{
+  padding:26px 28px 24px;
+  border:1px solid #e3eaf5;
+  border-radius:14px;
+  background:
+    radial-gradient(640px 300px at 0% 0%, #eaf1ff 0%, rgba(234,241,255,0) 68%),
+    linear-gradient(135deg,#fbfcff 0%,#ffffff 52%,#fdfaf6 100%);
+  box-shadow:0 1px 2px rgba(16,24,40,.04),0 16px 36px -28px rgba(37,99,235,.4);
+}
+.hero-stat{grid-template-columns:1fr 1fr;gap:10px;border-top:0;padding-top:2px}
+.hero-stat div{
+  padding:12px 14px 11px;border:1px solid #e7ecf6;border-radius:10px;
+  background:linear-gradient(180deg,#fbfcff,#f7fafd);
+}
+.hero-stat div:nth-child(1){background:linear-gradient(180deg,#f3f7ff,#eaf1ff);border-color:#dbe7fb}
+.hero-stat div:nth-child(2){background:linear-gradient(180deg,#fffcf6,#fff5e8);border-color:#f4e4c9}
+.hero-stat div:nth-child(3){background:linear-gradient(180deg,#f3fbf7,#e8f7f1);border-color:#d3ecdf}
+.hero-stat div:nth-child(4){background:linear-gradient(180deg,#fff8f2,#fff1e6);border-color:#f6ddca}
+.hero-stat .n{font-size:26px}
+.sec-title .count{
+  background:var(--blue-soft);border:1px solid #dbe7fb;color:var(--blue);
+  border-radius:999px;padding:1px 8px;font-weight:600;
+}
+.task{
+  position:relative;margin-bottom:10px;padding:16px 18px;
+  border:1px solid #e9eef7;border-radius:10px;
+  background:linear-gradient(180deg,#ffffff 0%,#fbfcff 100%);
+  box-shadow:0 1px 1px rgba(16,24,40,.03);
+}
+.task:last-child{margin-bottom:0;border-bottom:1px solid #e9eef7}
+.task::before{
+  content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;
+  border-radius:0 3px 3px 0;background:#cfe0ff;
+}
+.task:has(.type.clay)::before{background:#f3c69b}
+.task:hover{background:linear-gradient(90deg,#f2f7ff 0%,#ffffff 62%)}
+.task:hover::before{background:#2563eb}
+.task:has(.type.clay):hover::before{background:#e8590c}
+.task.done::before{background:#bfe6d6}
+.trace-row{
+  grid-template-columns:42px 1fr auto;padding:10px 10px;border-radius:8px;
+  border-bottom:1px dashed transparent;
+}
+.trace-row:nth-of-type(odd){background:rgba(37,99,235,.028)}
+.trace-row:hover{background:rgba(37,99,235,.06)}
+.trace-who{text-align:center;font-size:10px;padding:2px 0}
+
+

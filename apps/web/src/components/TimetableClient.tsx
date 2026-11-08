@@ -355,8 +355,8 @@ export default function TimetableClient({ courses }: { courses: CourseRow[] }) {
       <div className="notice">
         <span>说明</span>
         <span>
-          课表只作为调度源使用：产出课程建档、下一次上课时间、考试日期三项，不单独成为功能模块。
-          Excel 需要包含课程名称列；星期、时段、周次、教室列会被尽量识别，缺失项标为待补充。
+          课表只用来安排每天的练习节奏：导入后会生成课程、下一次上课时间和考试倒计时。
+          Excel 里至少要包含课程名称；星期、时段、周次、教室填得越全识别越准，缺的会标成「待补充」。
         </span>
       </div>
 

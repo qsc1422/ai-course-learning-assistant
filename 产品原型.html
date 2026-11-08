@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>课伴 · 人机协同学习原型</title>
+<style>
+:root{
+  --paper:#f5f7fa;
+  --sheet:#ffffff;
+  --sheet-2:#f7f9fc;
+  --ink:#111827;
+  --ink-2:#4b5563;
+  --muted:#8e99a8;
+  --line:#e4e8ef;
+  --line-2:#eff2f7;
+  --blue:#2563eb;
+  --blue-deep:#1d4ed8;
+  --blue-soft:#eef4ff;
+  --green:#0f9f6e;
+  --green-soft:#e8f7f1;
+  --clay:#e8590c;
+  --clay-soft:#fff1e8;
+  --gold:#b7791f;
+  --rail:#ffffff;
+  --rail-text:#111827;
+  --rail-dim:#8e99a8;
+  --radius:10px;
+  --serif:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  --sans:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  --mono:"JetBrains Mono",Consolas,"Courier New",monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:14px;
+  line-height:1.7;
+  background: var(--paper);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+h1,h2,h3,h4,p{margin:0}
+::selection{background:#d9e6df}
+
+/* ---------- shell ---------- */
+.shell{display:flex;min-height:100vh}
+.rail{
+  width:238px;flex:0 0 238px;background:var(--rail);color:var(--rail-text);
+  padding:22px 0 18px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+  border-right:1px solid var(--line);
+}
+.brand{padding:0 20px 22px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:11px}
+.brand .logo{
+  width:32px;height:32px;border-radius:9px;background:var(--blue);color:#fff;flex:0 0 32px;
+  display:grid;place-items:center;font-size:15px;font-weight:700;
+}
+.brand .mark{
+  font-family:var(--sans);font-size:20px;letter-spacing:.02em;line-height:1.2;
+  display:block;font-weight:700;
+}
+.brand .sub{font-size:10px;letter-spacing:.06em;color:var(--rail-dim);text-transform:uppercase;display:block}
+.nav{padding:16px 10px 6px}
+.nav-item{
+  display:flex;align-items:center;gap:11px;width:100%;padding:9px 12px;border-radius:8px;
+  color:var(--ink-2);font-size:13.5px;border-left:2px solid transparent;text-align:left;
+  transition:background .18s ease, color .18s ease;
+}
+.nav-item .no{font-family:var(--mono);font-size:11px;color:var(--muted);width:16px}
+.nav-item:hover{background:var(--sheet-2);color:var(--ink)}
+.nav-item.active{background:var(--blue-soft);border-left-color:var(--blue);color:var(--blue);font-weight:600}
+.nav-item.active .no{color:var(--blue)}
+
+.rail-course{padding:22px 20px 0}
+.rail-course .label{font-size:10.5px;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.rail-course button{
+  display:block;width:100%;text-align:left;padding:7px 0;color:var(--ink-2);font-size:12.5px;
+  border-bottom:1px solid var(--line-2);
+}
+.rail-course button:hover{color:var(--blue)}
+.rail-course .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue);margin-right:9px;vertical-align:1px}
+.rail-course .dot.g2{background:var(--green)}
+.rail-course .dot.g3{background:#f59e0b}
+.rail-foot{margin-top:auto;padding:14px 20px 0;font-size:11px;color:var(--muted);border-top:1px solid var(--line-2)}
+.rail-foot button{font-size:11.5px;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.rail-foot button:hover{color:var(--blue)}
+
+.main{flex:1;min-width:0}
+.topbar{
+  position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding:13px 34px;background:rgba(255,255,255,.84);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.crumb{font-size:12.5px;color:var(--ink-2);letter-spacing:.04em}
+.crumb b{font-weight:600;color:var(--ink)}
+.topmeta{display:flex;align-items:center;gap:16px;font-size:11.5px;color:var(--muted)}
+.demo-chip{
+  border:1px solid #c7d7ff;background:var(--blue-soft);color:var(--blue);padding:2px 10px;font-size:10.5px;
+  letter-spacing:.08em;border-radius:999px;
+}
+.stage{max-width:1180px;padding:32px 34px 90px;margin:0 auto}
+
+/* ---------- type ---------- */
+.kicker{font-size:11.5px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase}
+.h1{
+  font-family:var(--sans);font-size:34px;line-height:1.35;letter-spacing:-.02em;
+  font-weight:700;margin-top:12px;
+}
+.h2{font-family:var(--sans);font-size:20px;font-weight:650;line-height:1.4;letter-spacing:-.01em}
+.lede{color:var(--ink-2);font-size:14px;max-width:52ch}
+.sec-title{
+  font-family:var(--sans);font-size:15.5px;font-weight:650;display:flex;align-items:baseline;gap:10px;
+  padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:16px;letter-spacing:-.01em;
+}
+.sec-title .count{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.02em}
+.small{font-size:12px;color:var(--muted)}
+.mono{font-family:var(--mono);font-size:11.5px;letter-spacing:.02em}
+
+/* ---------- cards / buttons ---------- */
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.pad{padding:20px 22px}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:8px 15px;font-size:12.5px;
+  border:1px solid var(--line);color:var(--ink);background:var(--sheet);font-weight:500;
+  transition:background .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease;
+  border-radius:8px;
+}
+.btn:hover{background:var(--sheet-2);border-color:#cfd6e2;box-shadow:0 1px 2px rgba(16,24,40,.06)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 1px 2px rgba(37,99,235,.22)}
+.btn.primary:hover{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
+.btn.clay{background:var(--clay-soft);border-color:#f8cbb6;color:var(--clay)}
+.btn.clay:hover{background:#ffe4d6;border-color:#f3b99e;color:var(--clay)}
+.btn.ghost{border-color:var(--line);color:var(--ink-2)}
+.btn.ghost:hover{background:var(--sheet-2);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:active{transform:translateY(1px)}
+.link{font-size:12px;color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+.link.mute{color:var(--muted)}
+
+/* ---------- today ---------- */
+.hero{display:grid;grid-template-columns:1.55fr .85fr;gap:30px;align-items:end;margin-bottom:38px}
+.hero .lede{margin-top:16px}
+.hero-stat{display:grid;grid-template-columns:1fr 1fr;border-top:2px solid var(--ink)}
+.hero-stat div{padding:14px 4px 0;border-right:1px solid var(--line-2)}
+.hero-stat div:last-child{border-right:0}
+.hero-stat .n{
+  font-family:var(--sans);font-size:28px;font-weight:700;line-height:1.15;display:block;
+  letter-spacing:-.02em;
+}
+.hero-stat .t{font-size:11px;color:var(--muted);letter-spacing:.06em}
+
+.columns{display:grid;grid-template-columns:1.72fr .95fr;gap:34px}
+.task{
+  display:flex;gap:16px;align-items:flex-start;padding:18px 0;border-bottom:1px solid var(--line-2);
+}
+.task:last-child{border-bottom:0}
+.tick{
+  width:19px;height:19px;flex:0 0 19px;border:1px solid var(--muted);border-radius:50%;
+  margin-top:3px;display:grid;place-items:center;font-size:11px;color:transparent;
+  transition:all .18s ease;
+}
+.tick:hover{border-color:var(--blue);color:var(--blue)}
+.task.done .tick{background:var(--green);border-color:var(--green);color:#fff}
+.task.done .task-title{text-decoration:line-through;color:var(--muted)}
+.task-body{flex:1;min-width:0}
+.task-top{display:flex;gap:10px;align-items:center;margin-bottom:5px;flex-wrap:wrap}
+.type{
+  font-size:10.5px;letter-spacing:.06em;padding:2px 9px;border:1px solid var(--line);
+  color:var(--ink-2);background:var(--sheet-2);border-radius:999px;
+}
+.type.clay{border-color:#e2c0b0;color:var(--clay);background:var(--clay-soft)}
+.type.green{border-color:#c4d6cc;color:var(--green);background:var(--green-soft)}
+.task-title{font-size:15px;font-weight:600;line-height:1.5;margin-bottom:3px}
+.task-note{font-size:12.5px;color:var(--ink-2)}
+.path{
+  display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);margin-top:7px;
+}
+.path i{font-style:normal;color:var(--line)}
+
+.trace{display:flex;flex-direction:column;gap:0}
+.trace-row{display:grid;grid-template-columns:32px 1fr auto;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line-2);font-size:12.5px}
+.trace-row:last-child{border-bottom:0}
+.trace-who{
+  font-family:var(--mono);font-size:10px;letter-spacing:.04em;padding:2px 0;text-align:center;
+  align-self:start;
+}
+.trace-who.ai{color:var(--blue)}
+.trace-who.me{color:var(--clay)}
+.trace-txt{color:var(--ink-2);line-height:1.55}
+.trace-time{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+
+.mini-bars{margin-top:4px}
+.mini-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:12px}
+.mini-row .nm{width:88px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{flex:1;height:5px;background:var(--line-2);position:relative}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--green)}
+.bar i.mid{background:var(--gold)}
+.bar i.low{background:var(--clay)}
+.mini-row .lv{font-size:10.5px;color:var(--muted);width:30px;text-align:right}
+
+/* ---------- timetable ---------- */
+.upload{
+  border:1px dashed #cfd6e2;background:var(--sheet);padding:46px 30px;text-align:center;
+  border-radius:12px;transition:border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.upload:hover{border-color:var(--blue);background:#f8faff;box-shadow:0 6px 20px rgba(37,99,235,.08)}
+.upload .glyph{
+  font-family:var(--sans);font-size:40px;line-height:1;color:var(--muted);margin-bottom:12px;
+}
+.upload h3{font-family:var(--sans);font-size:17px;font-weight:650;margin-bottom:6px}
+.upload p{font-size:12.5px;color:var(--muted);margin-bottom:18px}
+.formats{display:flex;justify-content:center;gap:8px;margin-bottom:20px}
+.formats span{font-size:10.5px;letter-spacing:.08em;padding:2px 8px;border:1px solid var(--line);color:var(--ink-2)}
+
+.parse-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:80px 20px;text-align:center;gap:14px;
+}
+.spinner{width:26px;height:26px;border:1px solid var(--line);border-top-color:var(--clay);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.parse-state p{font-size:13px;color:var(--ink-2)}
+.parse-state .small{color:var(--muted)}
+
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{
+  text-align:left;font-size:10.5px;letter-spacing:.1em;color:var(--muted);
+  padding:0 12px 8px;font-weight:400;border-bottom:1px solid var(--ink);
+  white-space:nowrap;
+}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.tbl tr.low td{background:#fdf6ec}
+.tbl .edit{border-bottom:1px dashed var(--line);padding:2px 2px;min-width:40px;outline:none}
+.tbl .edit:focus{border-bottom-color:var(--green);background:#fff}
+.conf{
+  display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
+}
+.conf .track{width:34px;height:3px;background:var(--line-2);position:relative}
+.conf .track i{position:absolute;inset:0 auto 0 0;background:var(--green)}
+.conf.low .track i{background:var(--gold)}
+.conf.low{color:var(--gold)}
+.row-note{font-size:10.5px;color:var(--gold);display:block;margin-top:2px}
+.notice{
+  display:flex;gap:10px;padding:11px 14px;background:#fdf6ec;border:1px solid #ebd9b6;
+  font-size:12.5px;color:#6b5320;margin:16px 0;line-height:1.6;
+}
+.notice.ai{background:var(--blue-soft);border-color:#cfdcff;color:#1e3a8a}
+
+/* ---------- course ---------- */
+.course-head{display:flex;justify-content:space-between;align-items:flex-end;gap:26px;margin-bottom:26px}
+.course-meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:11.5px;color:var(--muted);margin-top:10px}
+.course-meta b{font-weight:500;color:var(--ink-2)}
+.chapters{display:flex;gap:0;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:22px}
+.chap{
+  padding:9px 16px;font-size:12.5px;color:var(--ink-2);border-bottom:2px solid transparent;
+  transition:color .16s ease,border-color .16s ease;
+}
+.chap:hover{color:var(--ink)}
+.chap.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+.chap .st{font-size:10px;color:var(--muted);margin-left:6px}
+.item{
+  display:grid;grid-template-columns:34px 1fr auto;gap:14px;padding:15px 2px;
+  border-bottom:1px solid var(--line-2);transition:background .16s ease;
+}
+.item:hover{background:#f8faff}
+.item.rejected{opacity:.5}
+.idx{font-family:var(--mono);font-size:11px;color:var(--muted);padding-top:3px}
+.item-name{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.item-desc{font-size:12.5px;color:var(--ink-2);margin-top:3px}
+.src{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:4px}
+.imp{
+  font-size:10px;letter-spacing:.04em;padding:1.5px 8px;border-radius:999px;font-weight:600;
+}
+.imp.must{background:var(--clay-soft);color:var(--clay)}
+.imp.under{background:var(--green-soft);color:var(--green)}
+.imp.know{background:#eef0ea;color:#6a7568}
+.state-chip{
+  font-size:10.5px;letter-spacing:.04em;padding:1.5px 8px;border:1px dashed var(--line);color:var(--muted);border-radius:999px;
+}
+.state-chip.adopted{border-style:solid;border-color:#c4d6cc;background:var(--green-soft);color:var(--green)}
+.state-chip.edited{border-style:solid;border-color:#e6d5ae;background:#faf0da;color:var(--gold)}
+.state-chip.rejected{border-style:solid;border-color:#e2dad0;background:#f2efe9;color:var(--muted)}
+.acts{display:flex;align-items:center;gap:6px;align-self:center}
+.act{
+  font-size:11.5px;padding:4px 10px;border:1px solid var(--line);color:var(--ink-2);border-radius:6px;
+  transition:all .15s ease;background:var(--sheet);
+}
+.act:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+.act.rej:hover{border-color:var(--clay);color:var(--clay);background:#fdf3ee}
+.act.chosen{border-color:var(--green);background:var(--green);color:#fff}
+.confirm-bar{
+  display:flex;justify-content:space-between;align-items:center;gap:20px;
+  margin-top:26px;padding-top:18px;border-top:1px solid var(--line);
+}
+.confirm-bar .sum{font-size:12.5px;color:var(--ink-2)}
+.confirm-bar .sum b{font-family:var(--mono);font-size:15px;color:var(--ink)}
+.chap-off{
+  font-size:12px;color:var(--muted);padding:14px;border:1px dashed var(--line);
+  background:var(--sheet-2);margin-top:16px;
+}
+
+/* ---------- practice ---------- */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:30px}
+.step{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted)}
+.step .num{
+  width:22px;height:22px;border:1px solid var(--line);display:grid;place-items:center;
+  font-family:var(--mono);font-size:10.5px;color:var(--muted);
+}
+.step.on .num{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.step.on{color:var(--ink)}
+.step.current .num{background:var(--blue);border-color:var(--blue);color:#fff}
+.step-line{width:28px;height:1px;background:var(--line);margin:0 10px}
+
+.q-card{border:1px solid var(--line);background:var(--sheet);padding:30px 34px;border-radius:12px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.q-top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
+.q-tags{display:flex;gap:8px;flex-wrap:wrap}
+.q-stem{font-size:16.5px;line-height:1.75;font-weight:600;margin-bottom:22px;font-family:var(--sans)}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{
+  display:flex;align-items:flex-start;gap:12px;padding:12px 15px;border:1px solid var(--line);
+  background:var(--sheet);text-align:left;font-size:13.5px;color:var(--ink);line-height:1.6;
+  transition:all .15s ease;border-radius:8px;
+}
+.opt:hover{border-color:#b9c8f5;background:#f9fbff}
+.opt .key{
+  font-family:var(--mono);font-size:11.5px;width:19px;height:19px;flex:0 0 19px;
+  border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);margin-top:1px;
+}
+.opt.sel{border-color:var(--blue);background:var(--blue-soft)}
+.opt.sel .key{background:var(--blue);color:#fff;border-color:var(--blue)}
+.opt.right{border-color:var(--green);background:var(--green-soft)}
+.opt.right .key{background:var(--green);color:#fff;border-color:var(--green)}
+.opt.wrong{border-color:var(--clay);background:var(--clay-soft)}
+.opt.wrong .key{background:var(--clay);color:#fff;border-color:var(--clay)}
+.q-actions{display:flex;gap:10px;align-items:center;margin-top:20px}
+
+.result{border-left:3px solid var(--green);padding:9px 0 9px 15px;margin:22px 0 0;font-size:13px;color:var(--ink-2)}
+.result.bad{border-left-color:var(--clay)}
+
+.hint-box{margin-top:22px;border:1px solid var(--line);background:var(--sheet-2);padding:18px 20px;border-radius:10px}
+.hint-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.hint-head h4{font-size:12px;letter-spacing:.1em;color:var(--muted);font-weight:400}
+.hint-levels{display:flex;gap:6px;margin-top:6px}
+.hint-dot{width:26px;height:3px;background:var(--line);border-radius:1px}
+.hint-dot.on{background:var(--blue)}
+.hint-text{padding:0 0 10px;border-bottom:1px dashed var(--line);margin-top:10px;font-size:13px;color:var(--ink-2)}
+.hint-text:last-child{border-bottom:0;padding-bottom:0}
+.hint-text .lv{font-family:var(--mono);font-size:10.5px;color:var(--blue);margin-right:9px}
+.solution{margin-top:14px;padding:14px;border:1px solid #e6d7b8;background:#fffaef;font-size:13px;color:#6b531f;border-radius:8px}
+.solution .tag-mini{font-size:10.5px;border:1px solid #dbc28f;padding:1px 6px;margin-right:8px;color:#7a5c1c}
+
+.recite{margin-top:30px;border-top:1px solid var(--line);padding-top:24px}
+.recite h3{font-family:var(--sans);font-size:16.5px;font-weight:650;margin-bottom:6px}
+.recite p{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+textarea{
+  width:100%;min-height:92px;resize:vertical;padding:13px 15px;font-family:var(--sans);
+  font-size:13.5px;line-height:1.7;color:var(--ink);background:var(--sheet);
+  border:1px solid var(--line);outline:none;border-radius:8px;
+}
+textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.bubble{
+  background:var(--blue-soft);border:1px solid #cfdcff;padding:15px 18px;margin-top:14px;font-size:13px;
+  color:#1e3a8a;line-height:1.7;position:relative;border-radius:10px;
+}
+.bubble .who{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--blue);display:block;margin-bottom:6px}
+.bubble ul{margin:8px 0 0;padding-left:18px}
+.bubble li{margin:4px 0}
+
+/* ---------- review ---------- */
+.mastery-row{display:grid;grid-template-columns:110px 1fr 60px;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line-2)}
+.mastery-row .nm{font-size:13px}
+.mastery-row .track{height:7px;background:var(--line-2);position:relative}
+.mastery-row .track i{position:absolute;left:0;top:0;bottom:0}
+.mastery-row .lv{font-size:11px;text-align:right;letter-spacing:.06em}
+.lv.good{color:var(--green)}.lv.mid{color:var(--gold)}.lv.weak{color:var(--clay)}
+.lv.none{color:var(--muted)}
+.wrong-card{border:1px solid var(--line);background:var(--sheet);padding:16px 18px;margin-bottom:10px;display:flex;gap:16px;align-items:center;border-radius:10px}
+.wrong-card .n{
+  font-family:var(--sans);font-size:20px;font-weight:700;color:var(--clay);width:34px;text-align:center;
+}
+.wrong-card .body{flex:1;min-width:0}
+.wrong-card .t{font-size:13.5px;font-weight:600}
+.wrong-card .d{font-size:11.5px;color:var(--muted);margin-top:2px}
+.wrong-card.cleared{opacity:.55}
+.wrong-card.cleared .n{color:var(--green)}
+
+.empty{border:1px dashed #cfd6e2;padding:46px 28px;text-align:center;color:var(--muted);font-size:12.5px;background:var(--sheet);border-radius:12px}
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  background:var(--ink);color:var(--paper);padding:10px 18px;font-size:12.5px;border-radius:2px;
+  transition:all .25s ease;z-index:60;max-width:80vw;
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1080px){
+  .hero,.columns{grid-template-columns:1fr;gap:24px}
+  .rail{width:206px;flex-basis:206px}
+}
+@media (max-width:820px){
+  .shell{flex-direction:column}
+  .rail{width:100%;height:auto;position:relative;flex-basis:auto;flex-direction:row;align-items:center;padding:10px 12px;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .brand{padding:0 14px 0 4px;border-bottom:0;border-right:1px solid var(--line-2)}
+  .brand .logo{width:26px;height:26px;flex:0 0 26px;font-size:13px;border-radius:7px}
+  .brand .mark{font-size:17px}.brand .sub{display:none}
+  .nav{display:flex;padding:0}
+  .nav-item{border-left:0;border-bottom:2px solid transparent;padding:6px 10px;white-space:nowrap}
+  .nav-item.active{border-left:0;border-bottom-color:var(--blue);background:var(--blue-soft)}
+  .rail-course,.rail-foot{display:none}
+  .topbar{padding:10px 18px}
+  .stage{padding:24px 18px 70px}
+  .h1{font-size:26px}
+  .q-card{padding:22px 18px}
+  .course-head{flex-direction:column;align-items:flex-start}
+  .item{grid-template-columns:24px 1fr;gap:10px}
+  .acts{grid-column:2;justify-self:start}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="brand">
+      <div class="logo">课</div>
+      <div>
+        <span class="mark">课伴</span>
+        <span class="sub">Human × AI Study</span>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <button class="nav-item active" data-view="today"><span class="no">01</span>今日</button>
+      <button class="nav-item" data-view="timetable"><span class="no">02</span>课表</button>
+      <button class="nav-item" data-view="course"><span class="no">03</span>课程</button>
+      <button class="nav-item" data-view="practice"><span class="no">04</span>练习</button>
+      <button class="nav-item" data-view="review"><span class="no">05</span>复盘</button>
+    </nav>
+    <div class="rail-course">
+      <div class="label">我的课程</div>
+      <button onclick="openCourse('ds')"><span class="dot"></span>数据结构与算法</button>
+      <button onclick="openCourse('en')"><span class="dot g2"></span>大学英语</button>
+      <button onclick="openCourse('pr')"><span class="dot g3"></span>概率论与数理统计</button>
+    </div>
+    <div class="rail-foot">
+      学期第 11 周 · 2026 秋<br>
+      <button onclick="resetDemo()">重置演示数据</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="crumb" id="crumb">今日 <i>/</i> 第 11 周</div>
+      <div class="topmeta">
+        <span class="demo-chip">演示原型 · 数据为模拟</span>
+        <span id="clock">周四 09:12</span>
+      </div>
+    </div>
+    <div class="stage" id="stage"></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================= 模拟数据 ======================= */
+const COURSES = [
+  { id:'ds', name:'数据结构与算法', code:'CS201', teacher:'张明', when:'周一 08:00–09:40', room:'教学楼 A302',
+    exam:'2026-01-12', next:'周一 08:00', pct:62, ch:5 },
+  { id:'en', name:'大学英语（读写）', code:'EN102', teacher:'李雯', when:'周二 10:00–11:40', room:'B105',
+    exam:'2026-01-09', next:'周二 10:00', pct:48, ch:4 },
+  { id:'pr', name:'概率论与数理统计', code:'MA203', teacher:'王建国', when:'周三 14:00–15:40', room:'C204',
+    exam:'2026-01-14', next:'周三 14:00', pct:35, ch:4 }
+];
+
+const TIMETABLE_ROWS = [
+  { course:'数据结构与算法', time:'周一 08:00–09:40', weeks:'1–16 周', room:'A302', conf:96, low:false },
+  { course:'大学英语（读写）', time:'周二 10:00–11:40', weeks:'1–16 周', room:'B105', conf:92, low:false },
+  { course:'概率论与数理统计', time:'周三 14:00–15:40', weeks:'1–16 周', room:'C204', conf:88, low:false },
+  { course:'马克思主义基本原理', time:'周四 15:50–17:30', weeks:'1–16 周', room:'D401', conf:54, low:true,
+    note:'周次识别不清：原图此处被水印遮挡，请核对' },
+  { course:'体育（羽毛球）', time:'周五 09:00–10:40', weeks:'1–16 周', room:'体育馆', conf:61, low:true,
+    note:'课程名可能为“大学体育（羽毛球）”，请核对' }
+];
+
+const CHAPTERS = [
+  { id:'c1', name:'第 1 章 绪论', state:'可练习' },
+  { id:'c2', name:'第 2 章 线性表', state:'可练习' },
+  { id:'c3', name:'第 3 章 栈与队列', state:'可练习' },
+  { id:'c4', name:'第 4 章 图', state:'整理中' },
+  { id:'c5', name:'第 5 章 查找与排序', state:'未开始' }
+];
+
+const ITEMS = [
+  { name:'图的定义与基本术语', desc:'有向/无向、度、路径、连通分量等基础概念。', imp:'must', impName:'必背', src:'第 4 章 · P78', status:'adopted' },
+  { name:'邻接矩阵与邻接表', desc:'两种存储结构的空间代价与适用场景。', imp:'must', impName:'必背', src:'第 4 章 · P80', status:'adopted' },
+  { name:'深度优先遍历（DFS）', desc:'递归与栈实现，访问序列的唯一性问题。', imp:'must', impName:'必背', src:'第 4 章 · P84', status:'draft' },
+  { name:'广度优先遍历（BFS）', desc:'队列实现，与最短路径的关系。', imp:'under', impName:'理解', src:'第 4 章 · P86', status:'draft' },
+  { name:'最小生成树（Prim / Kruskal）', desc:'两种算法的贪心策略与复杂度对比。', imp:'under', impName:'理解', src:'第 4 章 · P89', status:'draft' },
+  { name:'拓扑排序与 AOV 网', desc:'入度为零的顶点出列规则。', imp:'under', impName:'理解', src:'第 4 章 · P93', status:'draft' },
+  { name:'最短路径（Dijkstra）', desc:'单源最短路径，不适用负权边。', imp:'know', impName:'了解', src:'第 4 章 · P96', status:'draft' },
+  { name:'关键路径与 AOE 网', desc:'工程工期与关键活动，仅在习题中提及。', imp:'know', impName:'了解', src:'第 4 章 · P99', status:'draft' },
+  { name:'图的连通性判定', desc:'并查集与遍历判定连通分量。', imp:'know', impName:'了解', src:'第 4 章 · P101', status:'draft' }
+];
+
+const MASTERY = [
+  { name:'第 1 章 绪论', pct:86, lv:'稳固', cls:'good' },
+  { name:'第 2 章 线性表', pct:72, lv:'一般', cls:'mid' },
+  { name:'第 3 章 栈与队列', pct:41, lv:'薄弱', cls:'weak' },
+  { name:'第 4 章 图', pct:18, lv:'薄弱', cls:'weak' },
+  { name:'第 5 章 查找与排序', pct:0, lv:'样本不足', cls:'none' }
+];
+
+const WRONGS = [
+  { id:'w1', t:'邻接矩阵的存储代价', d:'3 次错误 · 均依赖提示通过 · 第 4 章 P80', n:3, cleared:false },
+  { id:'w2', t:'DFS 访问序列不唯一', d:'2 次错误 · 第 4 章 P84', n:2, cleared:false },
+  { id:'w3', t:'拓扑排序的判定条件', d:'1 次错误 · 第 4 章 P93', n:1, cleared:false }
+];
+
+const TASKS = [
+  { id:'t1', type:'错题重做', cls:'clay', course:'数据结构与算法', title:'昨天提示后才答对的 3 道题', note:'其中 2 题是「邻接矩阵的存储代价」。这次先不给提示。', path:'复盘 › 错题本 › 第 4 章', done:false },
+  { id:'t2', type:'课前预习', cls:'green', course:'概率论与数理统计', title:'第 5 章 · 大数定律与中心极限定理', note:'下节课周三 14:00，约 45 分钟。重点在两条定理的适用条件。', path:'课表 › 周三 › 第 5 章', done:false },
+  { id:'t3', type:'复述检验', cls:'', course:'大学英语', title:'Unit 4 文章段意概括', note:'AI 上次指出你漏掉了作者的态度转折，今天再讲一次。', path:'练习 › 复述追问', done:false }
+];
+
+/* ======================= 状态 ======================= */
+let S;
+
+function initialState(){
+  return {
+    view:'today',
+    course:'ds',
+    itemStatus: ITEMS.map(i => i.status),
+    editing:null,
+    chapterOff:false,
+    chapterConfirmed:false,
+    taskDone: TASKS.map(() => false),
+    ttStage:'idle',            // idle | parsing | done | imported
+    answersVisible:false,
+    practice:{ answered:false, choice:null, hints:0, solution:false, recited:false, reciteText:'' },
+    wrongs: WRONGS.map(w => ({...w})),
+    trace:[
+      { who:'AI', text:'按资料里的强调和习题密度，把第 4 章拆成 9 个知识点，分了三档。', time:'08:40' },
+      { who:'我', text:'把「关键路径」标成了解，老师说只考概念。', time:'08:46' },
+      { who:'AI', text:'已记住：本课程不考关键路径的计算题。', time:'08:46' },
+      { who:'我', text:'昨晚 3 道题是看了提示才做对的。', time:'22:10' },
+      { who:'AI', text:'这 3 题排进今天第一项，且不再提供第一级提示。', time:'22:10' }
+    ]
+  };
+}
+
+/* ======================= 工具 ======================= */
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('on'), 2400);
+}
+function nowTime(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function addTrace(who, text){
+  S.trace.push({ who, text, time: nowTime() });
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function courseById(id){ return COURSES.find(c => c.id === id) || COURSES[0]; }
+
+/* ======================= 路由 ======================= */
+function go(view){
+  S.view = view;
+  render();
+}
+function openCourse(id){
+  S.course = id;
+  S.view = 'course';
+  render();
+}
+function resetDemo(){
+  S = initialState();
+  render();
+  toast('演示数据已重置');
+}
+
+function render(){
+  document.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === S.view);
+  });
+  const crumbs = { today:'今日', timetable:'课表', course:'课程', practice:'练习', review:'复盘' };
+  let crumb = crumbs[S.view];
+  if(S.view === 'course') crumb = '课程 / ' + courseById(S.course).name;
+  if(S.view === 'practice') crumb = '练习 / 第 4 章 图';
+  if(S.view === 'review') crumb = '复盘 / 数据结构与算法';
+  document.getElementById('crumb').innerHTML = crumb + ' <i>/</i> 第 11 周';
+
+  const stage = document.getElementById('stage');
+  if(S.view === 'today') stage.innerHTML = viewToday();
+  else if(S.view === 'timetable') stage.innerHTML = viewTimetable();
+  else if(S.view === 'course') stage.innerHTML = viewCourse();
+  else if(S.view === 'practice') stage.innerHTML = viewPractice();
+  else stage.innerHTML = viewReview();
+}
+
+/* ======================= 视图：今日 ======================= */
+function viewToday(){
+  const doneCount = S.taskDone.filter(Boolean).length;
+  const adopted = S.itemStatus.filter(s => s === 'adopted' || s === 'edited').length;
+  const draft = S.itemStatus.filter(s => s === 'draft').length;
+
+  const tasks = TASKS.map((t,i) => `
+    <article class="task ${S.taskDone[i] ? 'done' : ''}">
+      <button class="tick" onclick="toggleTask(${i})" aria-label="标记完成">✓</button>
+      <div class="task-body">
+        <div class="task-top">
+          <span class="type ${t.cls}">${t.type}</span>
+          <span class="small">${t.course}</span>
+        </div>
+        <div class="task-title">${t.title}</div>
+        <div class="task-note">${t.note}</div>
+        <div class="path">${t.path.split(' › ').map(p => esc(p)).join(' <i>›</i> ')}</div>
+      </div>
+      <button class="btn ghost" onclick="startTask(${i})">${S.taskDone[i] ? '再看看' : '开始'}</button>
+    </article>`).join('');
+
+  const trace = S.trace.slice(-6).map(t => `
+    <div class="trace-row">
+      <div class="trace-who ${t.who === 'AI' ? 'ai' : 'me'}">${t.who === 'AI' ? 'AI' : '你'}</div>
+      <div class="trace-txt">${esc(t.text)}</div>
+      <div class="trace-time">${t.time}</div>
+    </div>`).join('');
+
+  const bars = MASTERY.slice(0,4).map(m => `
+    <div class="mini-row">
+      <span class="nm">${m.name}</span>
+      <span class="bar"><i class="${m.cls === 'mid' ? 'mid' : m.cls === 'weak' ? 'low' : ''}" style="width:${m.pct}%"></i></span>
+      <span class="lv">${m.pct}%</span>
+    </div>`).join('');
+
+  return `
+  <div class="hero">
+    <div>
+      <div class="kicker">第 11 周 · 周四 · 距《数据结构与算法》期末 65 天</div>
+      <h1 class="h1">今天只有三件事，<br>做完就收工。</h1>
+      <p class="lede">顺序是按各章掌握度和上课进度排的。没做完不叠加惩罚，明天继续接上。</p>
+    </div>
+    <div class="hero-stat">
+      <div><span class="n">${doneCount}/3</span><span class="t">今日完成</span></div>
+      <div><span class="n">${draft}</span><span class="t">待你确认的草稿</span></div>
+      <div style="margin-top:12px"><span class="n">${adopted}</span><span class="t">第 4 章已采纳</span></div>
+      <div style="margin-top:12px"><span class="n">71%</span><span class="t">本周完成率</span></div>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div>
+      <h2 class="sec-title">今日任务<span class="count">03</span></h2>
+      ${tasks}
+      <div class="notice ai" style="margin-top:22px">
+        <span>AI</span>
+        <span>今日任务都来自你自己的记录：错题、课表上的下一节课、上次复述的缺口。没有凭空安排的内容。</span>
+      </div>
+    </div>
+
+    <aside>
+      <h2 class="sec-title">协同轨迹<span class="count">最近</span></h2>
+      <div class="trace">${trace}</div>
+      <h2 class="sec-title" style="margin-top:26px">第 4 章掌握度<span class="count">ds</span></h2>
+      <div class="mini-bars">${bars}</div>
+      <button class="btn ghost" style="width:100%;justify-content:center;margin-top:14px" onclick="go('review')">查看完整复盘</button>
+    </aside>
+  </div>`;
+}
+
+function toggleTask(i){
+  S.taskDone[i] = !S.taskDone[i];
+  if(S.taskDone[i]) toast('已记下完成：' + TASKS[i].title);
+  render();
+}
+function startTask(i){
+  if(i === 0){ go('review'); toast('已打开错题本，先做「邻接矩阵的存储代价」'); }
+  else if(i === 1){ openCourse('pr'); toast('这是模拟数据，概率论课程页暂未展开'); }
+  else { go('practice'); }
+}
+
+/* ======================= 视图：课表 ======================= */
+function viewTimetable(){
+  if(S.ttStage === 'idle'){
+    return `
+    <div class="course-head">
+      <div>
+        <div class="kicker">学期建档</div>
+        <h1 class="h1" style="font-size:30px;margin-top:10px">把你的课表，变成学习节奏。</h1>
+        <p class="lede" style="margin-top:12px">上传教务系统截图或导出的表格，AI 识别后逐条核对。课表在这里不是一张图，它决定了后面每一次「课前预习」和「考试倒排」的时间点。</p>
+      </div>
+    </div>
+    <div class="upload">
+      <div class="glyph">＋</div>
+      <h3>拖入课表截图，或选择文件</h3>
+      <p>识别结果会先给你核对，确认前不会写入任何课程</p>
+      <div class="formats"><span>PNG / JPG</span><span>XLSX</span><span>PDF</span></div>
+      <button class="btn primary" onclick="startParse()">选择课表截图</button>
+      <div class="small" style="margin-top:14px">演示环境不会真正上传文件，点击即模拟识别过程</div>
+    </div>
+    <div class="notice" style="margin-top:22px">
+      <span>说明</span>
+      <span>课表只作为调度源使用：产出课程建档、下一次上课时间、考试日期三项，不单独成为功能模块。</span>
+    </div>`;
+  }
+
+  if(S.ttStage === 'parsing'){
+    return `
+    <div class="card parse-state">
+      <div class="spinner"></div>
+      <p>正在识别课表…</p>
+      <div class="small">提取课程名、星期与时段、周次范围</div>
+    </div>`;
+  }
+
+  if(S.ttStage === 'imported'){
+    return `
+    <div class="course-head">
+      <div>
+        <div class="kicker">学期已建档</div>
+        <h1 class="h1" style="font-size:28px;margin-top:8px">课表已导入，接下来按它排任务。</h1>
+      </div>
+      <button class="btn ghost" onclick="S.ttStage='idle';render()">重新导入</button>
+    </div>
+    ${importedPanel()}`;
+  }
+
+  const rows = TIMETABLE_ROWS.map((r,i) => `
+    <tr class="${r.low ? 'low' : ''}">
+      <td><span class="edit" contenteditable="true" data-i="${i}" data-f="course">${r.course}</span>
+        ${r.note ? `<span class="row-note">${r.note}</span>` : ''}</td>
+      <td><span class="edit" contenteditable="true" data-i="${i}" data-f="time">${r.time}</span></td>
+      <td><span class="edit" contenteditable="true" data-i="${i}" data-f="weeks">${r.weeks}</span></td>
+      <td><span class="edit" contenteditable="true" data-i="${i}" data-f="room">${r.room}</span></td>
+      <td>
+        <span class="conf ${r.low ? 'low' : ''}">
+          <span class="track"><i style="width:${r.conf}%"></i></span>${r.conf}%
+        </span>
+      </td>
+    </tr>`).join('');
+
+  return `
+  <div class="course-head">
+    <div>
+      <div class="kicker">识别完成 · 待你核对</div>
+      <h1 class="h1" style="font-size:28px;margin-top:8px">有 2 处我不确定，其余可直接用。</h1>
+      <p class="lede" style="margin-top:10px">识别置信度低于 70% 的行已标黄。文字可直接点开修改，改完再导入。</p>
+    </div>
+    <div class="mono" style="color:var(--muted)">来源：课表截图.png · 5 门课</div>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th>课程</th><th>时段</th><th>周次</th><th>教室</th><th>置信度</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+
+  <div class="notice ai" style="margin-top:20px">
+    <span>AI</span>
+    <span>识别不出来的地方我没有猜：标记为不确定，等你核对。确认后这 5 门课会进入课程列表，并从各自的下一节课开始排任务。</span>
+  </div>
+
+  <div class="confirm-bar">
+    <div class="sum">共 <b>5</b> 门课 · 其中 <b style="color:var(--gold)">2</b> 门待核对</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn ghost" onclick="cancelTimetable()">取消</button>
+      <button class="btn primary" onclick="confirmTimetable()">确认并导入</button>
+    </div>
+  </div>`;
+}
+
+function startParse(){
+  S.ttStage = 'parsing';
+  render();
+  setTimeout(() => {
+    S.ttStage = 'done';
+    render();
+    toast('识别完成，有 2 处需要你核对');
+  }, 1400);
+}
+function cancelTimetable(){
+  S.ttStage = 'idle';
+  render();
+}
+function confirmTimetable(){
+  const edits = document.querySelectorAll('.tbl .edit');
+  let changed = 0;
+  edits.forEach(el => {
+    const r = TIMETABLE_ROWS[+el.dataset.i];
+    const val = el.textContent.trim();
+    if(r[el.dataset.f] !== val){ r[el.dataset.f] = val; changed++; }
+  });
+  S.ttStage = 'imported';
+  addTrace('我', '核对了两处低置信度的课表信息，确认导入 5 门课。');
+  addTrace('AI', '已按课表建立课程，并把周三 14:00 的课排进下周任务。');
+  render();
+  toast(changed > 0 ? `已导入 5 门课，本次有 ${changed} 处修改被记住` : '已导入 5 门课');
+}
+function importedPanel(){
+  return `
+    <div class="notice ai">
+      <span>已导入</span>
+      <span>5 门课已进入课程列表，其中《数据结构与算法》下一次上课为周一 08:00。你这次的修改已写入课程偏好，之后识别同类课表会沿用。</span>
+    </div>
+    <div class="card pad" style="margin-top:16px">
+      <div class="h2" style="font-size:17px;margin-bottom:10px">导入结果</div>
+      <div class="small">数据结构与算法 · 周一 08:00–09:40 · A302</div>
+      <div class="small">大学英语（读写） · 周二 10:00–11:40 · B105</div>
+      <div class="small">概率论与数理统计 · 周三 14:00–15:40 · C204</div>
+      <div class="small">马克思主义基本原理 · 周四 15:50–17:30 · D401</div>
+      <div class="small">体育（羽毛球） · 周五 09:00–10:40 · 体育馆</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn primary" onclick="openCourse('ds')">进入第 4 章，确认知识点</button>
+      <button class="btn ghost" onclick="go('today')">回到今日</button>
+    </div>`;
+}
+
+/* ======================= 视图：课程 ======================= */
+function viewCourse(){
+  const c = courseById(S.course);
+  if(c.id !== 'ds'){
+    return `
+    <div class="course-head">
+      <div>
+        <div class="kicker">${c.code} · ${c.teacher}</div>
+        <h1 class="h1" style="font-size:30px">${c.name}</h1>
+        <div class="course-meta">
+          <span>上课 <b>${c.when}</b></span>
+          <span>教室 <b>${c.room}</b></span>
+          <span>期末 <b>${c.exam}</b></span>
+          <span>资料 <b>3 份 · 已解析</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="empty">
+      这门课的知识点还在草稿区，演示原型重点展示《数据结构与算法》第 4 章。<br>
+      <button class="link" style="margin-top:10px" onclick="openCourse('ds')">切到数据结构与算法</button>
+    </div>`;
+  }
+
+  const adopted = S.itemStatus.filter(s => s === 'adopted' || s === 'edited').length;
+  const draft = S.itemStatus.filter(s => s === 'draft').length;
+  const rejected = S.itemStatus.filter(s => s === 'rejected').length;
+
+  const chapTabs = CHAPTERS.map(ch => `
+    <button class="chap ${ch.id === 'c4' ? 'active' : ''}">
+      ${ch.name}<span class="st">${ch.id === 'c4' ? (S.chapterOff ? '已标记不考' : '整理中') : ch.state}</span>
+    </button>`).join('');
+
+  const items = ITEMS.map((it,i) => {
+    const st = S.itemStatus[i];
+    const cls = st === 'adopted' ? 'adopted' : st === 'edited' ? 'edited' : st === 'rejected' ? 'rejected' : '';
+    const chip = { adopted:'已采纳', edited:'已修改', rejected:'已驳回', draft:'草稿' }[st];
+    const editing = S.editing === i;
+    return `
+    <div class="item ${st === 'rejected' ? 'rejected' : ''}">
+      <div class="idx">${String(i+1).padStart(2,'0')}</div>
+      <div>
+        <div class="item-name">
+          ${editing
+            ? `<input id="edit-${i}" value="${esc(it.name)}" style="font:inherit;font-weight:600;border:1px solid var(--line);padding:2px 8px;width:min(340px,90%);background:#fff">`
+            : esc(it.name)}
+          <span class="imp ${it.imp}">${it.impName}</span>
+          ${st !== 'draft' ? `<span class="state-chip ${cls}">${chip}</span>` : ''}
+        </div>
+        <div class="item-desc">${esc(it.desc)}</div>
+        <div class="src">${it.src}${st === 'edited' ? ' · 已保留原始版本' : ''}</div>
+      </div>
+      <div class="acts">
+        ${editing
+          ? `<button class="act chosen" onclick="saveEdit(${i})">保存</button><button class="act" onclick="cancelEdit()">取消</button>`
+          : `<button class="act ${st === 'adopted' ? 'chosen' : ''}" onclick="adopt(${i})">采纳</button>
+             <button class="act" onclick="startEdit(${i})">修改</button>
+             <button class="act rej" onclick="reject(${i})">驳回</button>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="course-head">
+    <div>
+      <div class="kicker">${c.code} · ${c.teacher} · 已解析 3 份资料</div>
+      <h1 class="h1" style="font-size:30px">${c.name}</h1>
+      <div class="course-meta">
+        <span>下次上课 <b>${c.next}</b></span>
+        <span>期末 <b>${c.exam}</b></span>
+        <span>教室 <b>${c.room}</b></span>
+      </div>
+    </div>
+    <button class="btn ghost" onclick="uploadMore()">＋ 补充资料</button>
+  </div>
+
+  <div class="chapters">${chapTabs}</div>
+
+  <div class="notice ai">
+    <span>AI</span>
+    <span>我按资料里的强调方式、篇幅和课后习题密度，把第 4 章拆成 9 个知识点并分了三档。<b>这只是草稿，等你逐条确认。</b></span>
+  </div>
+
+  ${S.chapterOff ? `<div class="chap-off">整章已标记为「本章不考」，其中的知识点不会再出现在练习与统计中。可随时撤销。</div>` : ''}
+
+  <div style="margin-top:8px">${items}</div>
+
+  <div class="confirm-bar">
+    <div class="sum">已确认 <b>${adopted}</b> / 9 · 草稿 <b>${draft}</b> · 驳回 <b>${rejected}</b></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn ghost" onclick="toggleChapterOff()">${S.chapterOff ? '撤销「本章不考」' : '标记本章不考'}</button>
+      <button class="btn ghost" onclick="adoptAll()">整章采纳</button>
+      <button class="btn primary" onclick="finishChapter()">${S.chapterConfirmed ? '进入练习' : '确认本章'}</button>
+    </div>
+  </div>`;
+}
+
+function adopt(i){
+  S.itemStatus[i] = 'adopted';
+  addTrace('我', '采纳了「' + ITEMS[i].name + '」。');
+  render();
+  toast('已采纳');
+}
+function reject(i){
+  S.itemStatus[i] = 'rejected';
+  addTrace('我', '驳回了「' + ITEMS[i].name + '」，AI 会记住这个判断。');
+  render();
+  toast('已驳回，并写入课程偏好');
+}
+function startEdit(i){
+  S.editing = i;
+  render();
+  const input = document.getElementById('edit-' + i);
+  if(input){ input.focus(); input.select(); }
+}
+function cancelEdit(){ S.editing = null; render(); }
+function saveEdit(i){
+  const input = document.getElementById('edit-' + i);
+  if(input){
+    const v = input.value.trim();
+    if(v){ ITEMS[i].name = v; }
+  }
+  S.itemStatus[i] = 'edited';
+  S.editing = null;
+  addTrace('我', '修改了知识点名称并确认，原始版本已保留。');
+  render();
+  toast('已保存修改');
+}
+function adoptAll(){
+  S.itemStatus = S.itemStatus.map(() => 'adopted');
+  S.chapterConfirmed = true;
+  addTrace('我', '一键采纳了整章 9 个知识点。');
+  render();
+  toast('整章已采纳，章节进入可练习状态');
+}
+function toggleChapterOff(){
+  S.chapterOff = !S.chapterOff;
+  addTrace('我', S.chapterOff ? '标记第 4 章不考。' : '撤销第 4 章的「不考」标记。');
+  render();
+  toast(S.chapterOff ? '已标记本章不考，偏好已记录' : '已撤销');
+}
+function finishChapter(){
+  const adopted = S.itemStatus.filter(s => s === 'adopted' || s === 'edited').length;
+  if(adopted === 0){ toast('至少确认一个知识点，才能开始练习'); return; }
+  S.chapterConfirmed = true;
+  go('practice');
+  toast('本章已确认，进入练习');
+}
+function uploadMore(){ toast('演示原型：资料上传流程未展开'); }
+
+/* ======================= 视图：练习 ======================= */
+function viewPractice(){
+  const p = S.practice;
+  const stepIdx = !p.answered ? 1 : (p.recited ? 3 : 2);
+  const steps = ['出题','作答','提示','复述'].map((t,i) => `
+    <div class="step ${i < stepIdx ? 'on' : ''} ${i === stepIdx ? 'current' : ''}">
+      <span class="num">${i+1}</span>${t}
+    </div>`).join('<span class="step-line"></span>');
+
+  const opts = ['n + e','2e','e','2n'].map((o,i) => {
+    const key = 'ABCD'[i];
+    let cls = '';
+    if(p.answered){
+      if(i === 1) cls = 'right';
+      else if(i === p.choice) cls = 'wrong';
+    } else if(p.choice === i){
+      cls = 'sel';
+    }
+    return `<button class="opt ${cls}" onclick="choose(${i})" ${p.answered ? 'disabled' : ''}>
+      <span class="key">${key}</span><span>${o}</span></button>`;
+  }).join('');
+
+  const result = p.answered ? `
+    <div class="result ${p.choice === 1 ? '' : 'bad'}">
+      ${p.choice === 1
+        ? '<b>答对了。</b> 这道题你这次没有用提示，统计里记为「独立答对」。'
+        : '<b>不对。</b> 不直接给答案，先看你能走到哪一步。提示每请求一级都会记录下来。'}
+    </div>` : '';
+
+  const hintLevels = [1,2,3].map(n => `<span class="hint-dot ${p.hints >= n ? 'on' : ''}"></span>`).join('');
+  const hintTexts = [
+    '回忆一下「度」的定义：一个顶点的度，是它关联的边的数目。先别管公式。',
+    '换个角度：每条边有两个端点。把所有顶点的度数加起来时，这一条边被数了几次？',
+    '把每条边看作在两个端点各贡献一次，所以全部顶点的度数之和为边数的两倍。'
+  ];
+  const shownHints = hintTexts.slice(0, p.hints).map((t,i) => `
+    <div class="hint-text"><span class="lv">L${i+1}</span>${t}</div>`).join('');
+
+  const hintBlock = p.answered && p.choice !== 1 ? `
+    <div class="hint-box">
+      <div class="hint-head">
+        <h4>提示阶梯 · 每用一级都会记录</h4>
+        <div class="hint-levels">${hintLevels}</div>
+      </div>
+      ${shownHints}
+      ${p.hints < 3
+        ? `<button class="btn ghost" style="margin-top:12px" onclick="showHint()">
+             ${p.hints === 0 ? '给我一级提示' : p.hints === 1 ? '还不够，再给一级' : '最后一级'}
+           </button>`
+        : `<div class="notice" style="margin-top:12px"><span>记录</span><span>本题已用到第三级提示，记为「依赖提示通过」，明天会再出现一次。</span></div>`}
+      ${p.solution ? `<div class="solution"><span class="tag-mini">完整解答</span>无向图中所有顶点的度数之和等于边数的 2 倍，即 2e。选 B。</div>` : ''}
+    </div>` : '';
+
+  const reciteBlock = p.answered ? `
+    <div class="recite">
+      <h3>现在换我问你</h3>
+      <p>不用术语复述也行，用自己的话说清楚「为什么度数之和是边数的两倍」。说不清的地方，就是缺口。</p>
+      ${p.recited
+        ? `<textarea readonly>${esc(p.reciteText)}</textarea>
+           <div class="bubble">
+             <span class="who">AI · 追问</span>
+             你说的「每条边连着两个点」抓住了关键，但漏了一点：<b>你的说法没有排除自环</b>（自环只贡献 2 度，不是两个端点各 1 次）。
+             <ul>
+               <li>如果图里有自环，结论还成立吗？成立的话为什么？</li>
+               <li>有向图里对应的「度数之和」应该等于什么？</li>
+             </ul>
+           </div>
+           <div style="display:flex;gap:10px;margin-top:14px">
+             <button class="btn primary" onclick="go('review')">下一轮 → 复盘</button>
+             <button class="btn ghost" onclick="retryRecite()">再说一次</button>
+           </div>`
+        : `<textarea id="recite-input" placeholder="例如：因为每条边有两个端点，算每个点的度数时这条边会被数两次……">${esc(p.reciteText)}</textarea>
+           <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+             <button class="btn primary" onclick="submitRecite()">提交复述</button>
+             <button class="link mute" onclick="skipRecite()">这次跳过，不计入掌握度</button>
+           </div>`}
+    </div>` : '';
+
+  return `
+  <div class="steps">${steps}</div>
+  <div class="q-card">
+    <div class="q-top">
+      <div class="q-tags">
+        <span class="type">第 4 章 · 图</span>
+        <span class="type green">难度 基础</span>
+        <span class="small">来源 第 4 章 P79 · 由知识点「图的定义与基本术语」生成</span>
+      </div>
+      <div class="mono" style="color:var(--muted)">第 1 / 5 题</div>
+    </div>
+    <div class="q-stem">在无向图中，若顶点数为 n、边数为 e，则所有顶点的度数之和为：</div>
+    <div class="opts">${opts}</div>
+    ${result}
+    <div class="q-actions">
+      ${p.answered
+        ? `<button class="btn ghost" onclick="nextQuestion()">下一题</button>`
+        : `<button class="btn primary" onclick="submitAnswer()">提交答案</button>
+           <span class="small">答错也不会直接给答案</span>`}
+      <button class="link mute" style="margin-left:auto" onclick="endPractice()">结束本轮</button>
+    </div>
+    ${hintBlock}
+    ${reciteBlock}
+  </div>`;
+}
+
+function choose(i){ if(S.practice.answered) return; S.practice.choice = i; render(); }
+function submitAnswer(){
+  if(S.practice.choice === null){ toast('先选择一个答案'); return; }
+  S.practice.answered = true;
+  addTrace('我', '作答第 4 章第 1 题，选了 ' + 'ABCD'[S.practice.choice] + '。');
+  render();
+}
+function showHint(){
+  S.practice.hints = Math.min(3, S.practice.hints + 1);
+  if(S.practice.hints === 3) S.practice.solution = true;
+  addTrace('我', '请求了第 ' + S.practice.hints + ' 级提示。');
+  render();
+  if(S.practice.hints === 2) toast('提示每用一级都会被记录，影响这道题的掌握度标注');
+}
+function submitRecite(){
+  const el = document.getElementById('recite-input');
+  const v = el ? el.value.trim() : '';
+  if(!v){ toast('先写一句你自己的说法'); return; }
+  S.practice.reciteText = v;
+  S.practice.recited = true;
+  addTrace('我', '用自己的话复述了「度数之和为边数两倍」。');
+  addTrace('AI', '指出复述里漏掉的自环情形，并提出两个追问。');
+  render();
+  toast('复述已记录，AI 提出了两个追问');
+}
+function retryRecite(){ S.practice.recited = false; render(); }
+function skipRecite(){
+  S.practice.recited = true;
+  S.practice.reciteText = '（本次跳过复述，不计入掌握度）';
+  render();
+  toast('已跳过，本次不计入掌握度');
+}
+function nextQuestion(){ toast('演示原型只做了 1 道题，其余题目数据未展开'); }
+function endPractice(){ go('review'); }
+
+/* ======================= 视图：复盘 ======================= */
+function viewReview(){
+  const bars = MASTERY.map(m => `
+    <div class="mastery-row">
+      <span class="nm">${m.name}</span>
+      <span class="track"><i style="width:${m.pct}%;background:${m.cls === 'good' ? 'var(--green)' : m.cls === 'mid' ? 'var(--gold)' : 'var(--clay)'}"></i></span>
+      <span class="lv ${m.cls}">${m.lv}</span>
+    </div>`).join('');
+
+  const wrongs = S.wrongs.map(w => `
+    <div class="wrong-card ${w.cleared ? 'cleared' : ''}">
+      <div class="n">${w.cleared ? '✓' : w.n}</div>
+      <div class="body">
+        <div class="t">${esc(w.t)}</div>
+        <div class="d">${w.cleared ? '已通过重做 · ' + esc(w.d.split(' · ').pop()) : esc(w.d)}</div>
+      </div>
+      <button class="btn ${w.cleared ? 'ghost' : 'clay'}" onclick="redo(${S.wrongs.indexOf(w)})">
+        ${w.cleared ? '已完成' : '重做'}
+      </button>
+    </div>`).join('');
+
+  const trace = S.trace.slice(-7).map(t => `
+    <div class="trace-row">
+      <div class="trace-who ${t.who === 'AI' ? 'ai' : 'me'}">${t.who === 'AI' ? 'AI' : '你'}</div>
+      <div class="trace-txt">${esc(t.text)}</div>
+      <div class="trace-time">${t.time}</div>
+    </div>`).join('');
+
+  return `
+  <div class="course-head">
+    <div>
+      <div class="kicker">复盘 · 数据结构与算法 · 第 11 周</div>
+      <h1 class="h1" style="font-size:30px">第 3、4 章是今天的靶子。</h1>
+      <p class="lede" style="margin-top:10px">下面每一档都由你自己的答题记录算出，AI 只负责归因和排序。没确认过的知识点不计入。</p>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div>
+      <h2 class="sec-title">章节掌握度<span class="count">5 章</span></h2>
+      <div class="card pad" style="padding-top:6px;padding-bottom:10px">${bars}</div>
+
+      <h2 class="sec-title" style="margin-top:32px">错题本<span class="count">按知识点归因</span></h2>
+      ${wrongs}
+      <div class="small" style="margin-top:10px">重做通过后不再出现在次日任务，但仍保留在历史里。</div>
+    </div>
+
+    <aside>
+      <h2 class="sec-title">协同轨迹<span class="count">本轮</span></h2>
+      <div class="trace">${trace}</div>
+      <div class="notice ai" style="margin-top:20px">
+        <span>AI</span>
+        <span>根据你今天的记录，明天我打算把「邻接矩阵的存储代价」放在第一项，并且不给第一级提示。你可以改。</span>
+      </div>
+      <button class="btn primary" style="width:100%;justify-content:center;margin-top:12px" onclick="go('today')">接受，回今日任务</button>
+    </aside>
+  </div>`;
+}
+
+function redo(i){
+  const w = S.wrongs[i];
+  if(w.cleared) return;
+  w.cleared = true;
+  addTrace('我', '重做了「' + w.t + '」，这次独立答对。');
+  addTrace('AI', '这道题的掌握度已上调，明天不再安排。');
+  render();
+  toast('重做通过，已从次日任务移除');
+}
+
+/* ======================= 启动 ======================= */
+S = initialState();
+
+document.getElementById('nav').addEventListener('click', e => {
+  const btn = e.target.closest('.nav-item');
+  if(btn) go(btn.dataset.view);
+});
+
+render();
+</script>
+</body>
+</html>

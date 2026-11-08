@@ -1,0 +1,14 @@
+{
+  "name": "ke-ban",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @ke-ban/web",
+    "build": "npm run build -w @ke-ban/web",
+    "start": "npm run start -w @ke-ban/web",
+    "test": "npm run test -w @ke-ban/web"
+  }
+}

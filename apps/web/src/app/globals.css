@@ -508,5 +508,28 @@ textarea[readonly]{background:var(--sheet-2);color:var(--ink-2)}
 .rail-course .dot{width:7px;height:7px;box-shadow:0 0 0 2px rgba(37,99,235,.1)}
 .rail-foot{border-top-color:#dbe4f1}
 
+/* ---------- 只给首页四个统计方框上色，其余内容保持素净 ---------- */
+.hero-stat{grid-template-columns:1fr 1fr;gap:10px;border-top:0}
+.hero-stat div{
+  padding:12px 14px 10px;border:1px solid #dfe6f3;border-radius:9px;
+  background:linear-gradient(180deg,#f6f9ff,#edf3fc);
+}
+.hero-stat div:last-child{border-right:1px solid #dfe6f3}
+.hero-stat div:nth-child(1){
+  background:linear-gradient(180deg,#eef4ff,#dfeaff);border-color:#cbddfa;
+}
+.hero-stat div:nth-child(2){
+  background:linear-gradient(180deg,#fffaf1,#ffefd9);border-color:#efdabb;
+}
+.hero-stat div:nth-child(3){
+  background:linear-gradient(180deg,#eefaf4,#def3e7);border-color:#c8e6d6;
+}
+.hero-stat div:nth-child(4){
+  background:linear-gradient(180deg,#fff5ea,#ffe9d5);border-color:#f2d6bb;
+}
+.hero-stat .n{font-size:28px}
+.hero-stat .t{display:block;margin-top:2px}
+
+
 
 
